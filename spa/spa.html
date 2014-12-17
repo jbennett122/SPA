@@ -1,125 +1,24 @@
 <!doctype html>
 <html>
 <head>
-	
-	<title>SPA Chapter 1 section 1.2.2</title>
-	<style type="text/css">
-	
-	body { 
-		width:100%;
-		height:100%
-		overflow:hidden;
-		background-color:#777;
-		}
-	
-	#spa {
-		position:absolute;
-		top:8px;
-		left:8px;
-		right:8px;
-		bottom:8px;
-		border-radius: 8px 8px 0 8px;
-		background-color:#fff;
-		}
-	
-	.spa-slider {
-		position:absolute;
-		bottom:0;
-		right:2px;
-		width:300px;
-		height:16px;
-		cursor:pointer;
-		border-radius:8px 0 0 0;
-		background-color:#f00;
-		}
-			
-	</style>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
-	</script>
-	
-	<script type="text/javascript">
-	/* jslint settings		browser:true, continue:true, 
-	   devel :true, indent:2,	maxerr:50,
-	   newcap:true, nomen:true, plusplus:true,
-	   regexp:true, sloppy:true,vars:true,
-	   white:true	
-	*/
-	/*global jQuery */
-	
-	//Module /spa/
-	//provides chat slider capability
-	//
-		var spa = (function($) {
-		//module scope variables
-			var 
-			//set constants
-			configMap ={
-				extended_height:434,
-				extended_title:'Click to Retract',
-				retracted_height:16,
-				retracted_title:'Click to expand',
-				template_html:'<div class="spa-slider"><\/div>'
-				},
-			$chatSlider,toggleSlider,onClickSlider,initModule;
-			//declare all other module scope variables
-			
-	//DOM method /toggleSlider/
-	//alternates slider height
-	//
-		toggleSlider = function() {
-			var slider_height = $chatSlider.height();
-		
-			//extend slider if fully retracted
-			if ( slider_height === configMap.retracted_height ){
-			$chatSlider
-			  .animate({height:configMap.extended_height})
-			  .attr('title', configMap.extended_title);
-			return true;
-		}
-			else if (slider_height===configMap.retracted_height){
-			$chatSlider
-			  .animate({height:configMap.retracted_height
-			
-			
-			}
-	
-	//Event handler /onClickSlider/
-	//receives click event and calls toggleSlider
-	//
-		onClickSlider = function(event) {}
-		
-	//Public Method /initModule/
-	//sets initial state and provides features
-	//
-		initModule = function($container) {
-		//render html
-		//initializes slider height and title
-		//bind the user click event to the event handler
-		};
-	//Start spa once DOM is ready
-	
-	}());
-	</script>
+<title>SPA Starter</title>
+<!-- stylesheets -->
+<link rel="stylesheet" href="css/spa.css" type="text/css"/>
+<link rel="stylesheet" href="css/spa.shell.css" type="text/css"/>            
+<!-- third-party javascript -->
+<script src="js/jq/jquery-1.11.1.js" ></script>
+<script src="js/jq/jquery.uriAnchor-1.1.3.js"></script>
+<!-- our javascript -->
+<script src="js/spa.js" ></script>
+<script src="js/spa.shell.js"></script>
+
+<script>test();</script>
+
+<script>
+$(function () { spa.initModule( $('#spa') ); });
+</script>
 </head>
-
-
-<!----------------------------BODY FOR ONLINE D&D, with google hangout capabilites, host pdfs of books,character sheets---> 
-
-
-
-
 <body>
-	
-	<!----ever changing space--->
-	<div id="spa">
-	
-	
-	
-	
-		<div class="spa-slider"></div>
-	
-	</div>
-	
-	
+<div id="spa">nothing works</div>
 </body>
 </html>
