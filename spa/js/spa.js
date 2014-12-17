@@ -8,16 +8,18 @@ newcap : true, nomen : true, plusplus : true,
 regexp : true, sloppy : true, vars : false,
 white : true
 */
-/*global $,spa*/
 
-var spa= (function (){
-  var initModule = function($container){
-    $container.html{'<h1 style="display:inline-block; margin:25px;">'
-      + 'hello world!'
-      + '</h1>'
-    };
+var test = function(){
+  console.log('Yeah it works');
+  
   };
 
-  
-  return{initModule:initModule};
-}();
+/*global $, spa */
+
+
+var spa = (function () {
+var initModule = function ( $container ) {
+spa.shell.initModule( $container );
+};
+return { initModule: initModule };
+}());
