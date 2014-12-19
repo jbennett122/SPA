@@ -14,30 +14,36 @@ spa.shell = (function (){
  var configMap = {
   main_html : String()
     + '<div class="spa-shell-head">'
-      + '<div class="spa-shell-head-logo">logo</div>'
+      + '<div class="spa-shell-head-logo">Odu-lion-logo</div>'
       + '<div class="spa-shell-head-acct">account</div>'
       + ' <div class="spa-shell-head-search">search</div>'
     + '</div>'
 
       + '<div class="spa-shell-main">'
-        + '<div class="spa-shell-main-nav"><h1>Hi there</h1></div>'
+        + '<div class="spa-shell-main-nav"><h1>Hi there</h1>'
+		+ '<nav><ol><li>a</li><li>Drop down menus:</li><li>Instructor</li><li>Document</li>'
+		+ '<li>Stays grey untill instructor is selected</li></div>'
         + '<div class="spa-shell-main-content">main content</div>'
       + '</div>'
 
       + '<div class="spa-shell-foot">footer</div>'
       + '<div class="spa-shell-chat">chat</div>'
-      + '<div class="spa-shell-modal"></div>',
+      + '<div class="spa-shell-modal">f</div>',
 	
 	chat_extend_time: 1000,
 	chat_retract_time: 300,
 	chat_extend_height:450,
-	chat_retract_height:15	
+	chat_retract_height:15,
+	
+	chat_extended_title : 'Click to REtract',
+    chat_retracted_title : 'Click to extend'
 	 
 },
-stateMap = { $container : null },
+stateMap = { $container : null,
+			is_chat_retracted:true},
 jqueryMap = {},
 
-setJqueryMap, toggleChat, initModule;
+setJqueryMap, toggleChat,onClickChat, initModule;
 //----------------- END MODULE SCOPE VARIABLES ---------------
 //-------------------- BEGIN UTILITY METHODS -----------------
 //--------------------- END UTILITY METHODS ------------------
@@ -64,6 +70,9 @@ var $container = stateMap.$container;
 // * true - slider animation activated
 // * false - slider not activated
 //
+//State :set stateMap.is_chat_retracted
+//	*true - slider is retracted 
+//	*false - slider is extended
 toggleChat = function(do_extend,callback){
  var
   px_chat_ht = jqueryMap.$chat.height(),
@@ -78,8 +87,12 @@ toggleChat = function(do_extend,callback){
  if (do_extend) {
   jqueryMap.$chat.animate(
     {height: configMap.chat_extend_height},
-	 configMap.chat_extend_time,
-	  function(){
+	 configMap.chat_extend_time, 
+		function () {
+			jqueryMap.$chat.attr(
+			'title', configMap.chat_extended_title
+								);					
+stateMap.is_chat_retracted = false;
 	   if (callback) {callback(jqueryMap.$chat);}
 	  }
   );
@@ -91,8 +104,12 @@ toggleChat = function(do_extend,callback){
     jqueryMap.$chat.animate(
       { height : configMap.chat_retract_height },
         configMap.chat_retract_time,
-        function () {
-          if ( callback ){ callback( jqueryMap.$chat ); }
+          function () {
+			jqueryMap.$chat.attr('title', configMap.chat_retracted_title
+								);
+		  stateMap.is_chat_retracted = true;
+          
+		  if ( callback ){ callback( jqueryMap.$chat ); }
         }
       );
    return true;
@@ -103,6 +120,13 @@ toggleChat = function(do_extend,callback){
 
 //--------------------- END DOM METHODS ----------------------
 //------------------- BEGIN EVENT HANDLERS -------------------
+//---------------------Chat toggle----------------------------
+onClickChat = function ( event ) {
+toggleChat( stateMap.is_chat_retracted );
+return false;
+};
+
+
 //-------------------- END EVENT HANDLERS --------------------
 //------------------- BEGIN PUBLIC METHODS -------------------
 // Begin Public method /initModule/
@@ -110,6 +134,13 @@ initModule = function ( $container ) {
 stateMap.$container = $container;
 $container.html( configMap.main_html );
 setJqueryMap();
+
+
+// initialize chat slider and bind click handler
+stateMap.is_chat_retracted = true;
+jqueryMap.$chat
+	.attr( 'title', configMap.chat_retracted_title )
+	.click( onClickChat );
 
 // test toggle
 setTimeout( function () {toggleChat( true ); }, 3000 );
