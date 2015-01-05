@@ -12,10 +12,15 @@ white : true
 spa.shell = (function (){
 //---------------- BEGIN MODULE SCOPE VARIABLES --------------
  var configMap = {
+ 
+   anchor_schema_map :{ 
+     chat : { open : true , close:false}
+	 },
+ 
   main_html : String()
     + '<div class="spa-shell-head">'
       + '<div class="spa-shell-head-logo">Odu-lion-logo</div>'
-      + '<div class="spa-shell-head-acct">account</div>'
+      + '<div class="spa-shell-head-acct"></div>'
       + ' <div class="spa-shell-head-search">search</div>'
     + '</div>'
 
@@ -30,8 +35,8 @@ spa.shell = (function (){
       + '<div class="spa-shell-chat">chat</div>'
       + '<div class="spa-shell-modal">f</div>',
 	
-	chat_extend_time: 1000,
-	chat_retract_time: 300,
+	chat_extend_time:  2,
+	chat_retract_time: 2000,
 	chat_extend_height:450,
 	chat_retract_height:15,
 	
@@ -39,13 +44,23 @@ spa.shell = (function (){
     chat_retracted_title : 'Click to extend'
 	 
 },
-stateMap = { $container : null,
-			is_chat_retracted:true},
+stateMap = { 
+			$container : null,
+			anchor_map : {},
+			is_chat_retracted:true
+			},
 jqueryMap = {},
 
-setJqueryMap, toggleChat,onClickChat, initModule;
+
+copyAnchorMap, setJqueryMap, toggleChat, changeAnchorPart, 
+onHashChange, onClickChat, initModule;
 //----------------- END MODULE SCOPE VARIABLES ---------------
 //-------------------- BEGIN UTILITY METHODS -----------------
+// Returns copy of stored anchor map; minimizes overhead
+//creates object just to return, $ is the object calling this function
+copyAnchorMap = function () {
+return $.extend( true, {}, stateMap.anchor_map );
+};
 //--------------------- END UTILITY METHODS ------------------
 //--------------------- BEGIN DOM METHODS --------------------
 // Begin DOM method----/setJqueryMap/-------------------------
@@ -57,7 +72,71 @@ var $container = stateMap.$container;
    $chat : $container.find('.spa-shell-chat')
   };
 };
-//--------------------/setJqueryMap/--------------------------
+
+//----------------------changeAnchorPart----------------------/
+// Purpose : Changes part of the URI anchor component
+// Arguments:
+// * arg_map - The map describing what part of the URI anchor
+// we want changed.
+// Returns : boolean
+// * true - the Anchor portion of the URI was update
+// * false - the Anchor portion of the URI could not be updated
+// Action :
+// The current anchor rep stored in stateMap.anchor_map.
+// See uriAnchor for a discussion of encoding.
+// This method
+// * Creates a copy of this map using copyAnchorMap().
+// * Modifies the key-values using arg_map.
+// * Manages the distinction between independent
+// and dependent values in the encoding.
+// * Attempts to change the URI using uriAnchor.
+// * Returns true on success, and false on failure.
+//
+changeAnchorPart = function (arg_map){
+
+	var anchor_map_revise = copyAnchorMap(),
+	bool_return = true,
+	key_name, key_name_dep;
+	
+//Begin merge changes into anchor map
+KEYVAL:
+for (key_name in arg_map) {
+	if(arg_map.hasOwnProperties(key_name)){
+	
+	//skip dependent keys during iteration
+	if (key_name.indexOf( '_' ) === 0 ) {continue KEYVAL;}
+	
+	//update independent key value
+	anchor_map_revise[key_name] = arg_map[key_name];
+	
+	// update matching dependent key
+key_name_dep = '_' + key_name;
+if ( arg_map[key_name_dep] ) {
+anchor_map_revise[key_name_dep] = arg_map[key_name_dep];
+}
+else {
+delete anchor_map_revise[key_name_dep];
+delete anchor_map_revise['_s' + key_name_dep];
+}
+}
+}
+// End merge changes into anchor map
+// Begin attempt to update URI; revert if not successful
+try {
+$.uriAnchor.setAnchor( anchor_map_revise );
+}
+catch ( error ) {
+// replace URI with existing state
+$.uriAnchor.setAnchor( stateMap.anchor_map,null,true );
+bool_return = false;
+}
+// End attempt to update URI...
+return bool_return;
+
+};
+
+//--------------------/end changeAnchorPart/------------------
+//--------------------/end setJqueryMap/----------------------
 //Begin---------------/toggleChat/----------------------------
 //Purpose: Extends or retracts slider
 //Arguments:
@@ -121,12 +200,72 @@ stateMap.is_chat_retracted = false;
 //--------------------- END DOM METHODS ----------------------
 //------------------- BEGIN EVENT HANDLERS -------------------
 //---------------------Chat toggle----------------------------
-onClickChat = function ( event ) {
-toggleChat( stateMap.is_chat_retracted );
+onClickChat = function (event) {
+if (toggleChat(stateMap.is_chat_retracted)){
+	$.uriAnchor.setAnchor({
+		chat:(stateMap.is_chat_retracted ? 'open' : 'closed' )
+		});
+	}
 return false;
 };
 
 
+// Begin Event handler /onHashchange/
+// Purpose : Handles the hashchange event
+// Arguments:
+// * event - jQuery event object.
+// Settings : none
+// Returns : false
+// Action :
+// * Parses the URI anchor component
+// * Compares proposed application state with current
+// * Adjust the application only where proposed state
+// differs from existing
+//
+onHashchange= function ( event ) {
+    var anchor_map_previous = copyAnchorMap(),
+        anchor_map_proposed,
+        _s_chat_previous, 
+		_s_chat_proposed,
+		s_chat_proposed;
+		
+// attempt to parse anchor
+try { anchor_map_proposed = $.uriAnchor.makeAnchorMap(); }
+catch ( error ) {
+     $.uriAnchor.setAnchor( anchor_map_previous, null, true );
+	 
+return false;
+}
+
+stateMap.anchor_map = anchor_map_proposed;
+
+// convenience vars
+_s_chat_previous = anchor_map_previous._s_chat;
+_s_chat_proposed = anchor_map_proposed._s_chat;
+// Begin adjust chat component if changed
+if ( ! anchor_map_previous|| _s_chat_previous !== _s_chat_proposed) 
+	{
+       
+	   s_chat_proposed = anchor_map_proposed.chat;
+    
+    	switch ( s_chat_proposed ) {
+             
+			 case 'open' :toggleChat( true );
+			 break;
+			 case 'closed' :toggleChat( false );
+			 break;
+			 default :toggleChat( false );
+			 delete anchor_map_proposed.chat;
+			 
+$.uriAnchor.setAnchor( anchor_map_proposed, null, true );
+            }		
+	}
+// End adjust chat component if changed
+
+ return false;
+
+};
+// End Event handler /onHashchange/
 //-------------------- END EVENT HANDLERS --------------------
 //------------------- BEGIN PUBLIC METHODS -------------------
 // Begin Public method /initModule/

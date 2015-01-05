@@ -43,7 +43,7 @@ right : 8px;
 min-height : 500px;
 min-width : 500px;
 overflow : hidden;
-background-color : #fff;
+background-color : #ddd222;
 border-radius : 0 8px 0 8px;
 }
 /** End spa namespace selectors */
